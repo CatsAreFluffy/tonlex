@@ -1,0 +1,111 @@
+<html>
+<head>
+<script>
+//If you are reading this, I have been extorted into publishing this code by the other members of the Sheet Analysis. For security reasons, I have hidden a trigger that makes this code unusable for anyone but me.
+n=1
+setbase(2)
+load()
+function setbase(x,y){
+	if(x==0){
+		base={"0":"0","e0":"E","e1":"F","e2":"G","Ordinal (standard)":"Ordinal (TONlex 0th system)"}
+		drop=["W","Z","T_3"]
+	}else if(x==1){
+		base={"0":"0","W":"W","W_2":"X","Ordinal (standard)":"Ordinal (TONlex 1st system)"}
+		drop=["Z","T_3"]
+	}else if(x==2){
+		base={"0":"0","Z":"Z","Ordinal (standard)":"Ordinal (TONlex 2nd system)"}
+		drop=["T_3"]
+	}else if(x==3){
+		base={"0":"0","T_3":"T","Ordinal (standard)":"Ordinal (TONlex 3rd system)"}
+		drop=[]
+	}else if(x==Infinity){
+		base={"0":"0","W":"W","Z":"Z","T_3":"T","Ordinal (standard)":"Ordinal (TONlex combined system)"}
+		drop=[]
+	}else{
+		base=x?x:base
+		drop=y?y:base
+	}
+}
+function settrans(x){
+	trans=x
+}
+function save(){
+	localStorage.setItem("tonlex",btoa(JSON.stringify(t)))
+	//return JSON.stringify(t)
+}
+function load(){
+	t=JSON.parse(atob(localStorage.getItem("tonlex")))
+}
+function clear(x){
+	delete t[x]
+}
+function clearbulk(){
+	var x=tclear.value.split("\n")
+	x.map(clear)
+}
+function spider(x){
+	var a=t[x]
+	delete t[x]
+	if(base[x]||drop.includes(x)||x=="?"){
+		return
+	}
+	spider(a[0])
+	spider(a[1])
+}
+function reduce(x,mode){
+	if(base[x]){
+		if(mode==0){
+			return base[x]
+		}else if(x=="Ordinal (standard)"){
+			return "Ordinal (TON)"
+		}else{
+			return x
+		}
+	}else if(x=="?"||!x||drop.includes(x)){
+		return "?"
+	}else{
+		if(!t[x]){
+			var n=0
+			console.log(x)
+			n=prompt(x)
+			if(n){
+				t[x]=n.split(" ")
+			}else{
+				return "?"
+			}
+		}
+		if(mode==0){
+			return reduce(t[x][1],mode)+reduce(t[x][0],mode)+"C"
+		}else if(mode==1){
+			return "C("+t[x][0]+","+t[x][1]+")"
+		}else{
+			return "C("+reduce(t[x][0],mode-1)+","+reduce(t[x][1],mode-1)+")"
+		}
+	}
+}
+function bulkreduce(mode){
+	var x=tin.value
+	tout.value=x.split("\n").map(x=>reduce(x,mode)).join("\n")
+}
+</script>
+</head>
+<body>
+<textarea id="tin"></textarea>
+<textarea id="tout"></textarea><br>
+<button onclick="bulkreduce(1)">C</button><br>
+<button onclick="bulkreduce(Infinity)">FC</button><br>
+<button onclick="bulkreduce(n)">NC</button><br>
+<button onclick="bulkreduce(0)">Lex</button><br>
+<button onclick="setbase(0)">0</button><br>
+<button onclick="setbase(1)">1</button><br>
+<button onclick="setbase(2)">2</button><br>
+<button onclick="setbase(3)">3</button><br>
+<button onclick="setbase(Infinity)">Inf</button><br>
+<button onclick="n=1">D1</button><br>
+<button onclick="n=2">D2</button><br>
+<button onclick="n=3">D3</button>
+<textarea id="tclear"></textarea>
+<button onclick="clearbulk()">End the world</button>
+<button onclick="save()">Save</button>
+</body>
+</html>
