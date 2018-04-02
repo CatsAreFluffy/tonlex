@@ -30,11 +30,11 @@ function settrans(x){
 	trans=x
 }
 function save(){
-	localStorage.setItem("tonlexp",btoa(JSON.stringify(t)))
+	localStorage.setItem("tonlex",btoa(JSON.stringify(t)))
 	//return JSON.stringify(t)
 }
 function load(){
-	Object.assign(t,JSON.parse(atob(localStorage.getItem("tonlexp"))))
+	Object.assign(t,JSON.parse(atob(localStorage.getItem("tonlex"))))
 }
 function clear(x){
 	delete t[x]
