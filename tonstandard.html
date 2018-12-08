@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TON Standardness checker</title>
+	<script>
+	var notation=2
+	var d=true
+	function limit(l){
+		var ll=l.split("")
+		bump(ll)
+		while(!standard(fromlex(ll.join("")))){
+			console.log(ll)
+			bump(ll)
+		}
+		return cpad(ll.join(""))
+	}
+	function bump(l){
+		if(l.length==0){
+			throw "fail"
+		}
+		while(l[l.length-1]=="Z"){
+			l.pop()
+		}
+		l[l.length-1]={"C":"0","0":"Z"}[l[l.length-1]]
+	}
+	function cpad(e){
+		var stacksize=0
+		for(var i=0;i<e.length;i++){
+			if(e[i]=="C"){
+				stacksize--
+			}else{
+				stacksize++
+			}
+		}
+		var ret=e
+		for(;stacksize>1;stacksize--){
+			ret+="C"
+		}
+		return ret
+	}
+	function tolex(e){
+		if(e=="0"||e=="Z"){
+			return e
+		}else{
+			return tolex(e[1])+tolex(e[0])+"C"
+		}
+	}
+	function fromlex(e){
+		var stack=[]
+		for(var i=0;i<e.length;i++){
+			if(e[i]=="C"){
+				stack.push([stack.pop(),stack.pop()])
+			}else{
+				stack.push(e[i])
+			}
+		}
+		while(stack.length>1){
+			stack.push([stack.pop(),stack.pop()])
+		}
+		return stack[0]
+	}
+	function standard(e){
+		if(e=="0"){
+			return true
+		}
+		if(e=="Z"){
+			return true
+		}
+		if(!standard(e[0])){
+			return false
+		}
+		if(!standard(e[1])){
+			return false
+		}
+		if(e[1][1]&&tonlt(e[1][0],e[0])){
+			return false
+		}
+		if(!bfb(notation,e[0],e)){
+			return false
+		}
+		return true
+	}
+	function standardlex(e){
+		return standard(fromlex(e))
+	}
+	function standardlist(l){
+		var ll=l.split("\n")
+		for(var i=0;i<ll.length;i++){
+			if(ll[i].length==0||ll[i]=="?"||ll[i]=="CIF"){
+				continue
+			}
+			if(!standardlex(ll[i])){
+				console.log(ll[i])
+			}
+		}
+		return true
+	}
+	function tonlt(a,b){
+		var as=tolex(a)
+		var bs=tolex(b)
+		var table={"C":0,"0":1,"Z":2}
+		for(var i=0;i<Math.min(as.length,bs.length);i++){
+			if(table[as[i]]<table[bs[i]]){
+				return true
+			}else if(table[as[i]]>table[bs[i]]){
+				return false
+			}
+		}
+		return as.length<bs.length
+	}
+	function bfb(n,a,b,c){
+		if(n==0){
+			return tonlt(a,b)
+		}else if(a=="0"||a=="Z"){
+			return true
+		}else if(c===undefined){
+			return bfb(n,a,b,a)
+		}else{
+			if(bfb(n-1,a,b)){
+				//masked
+				return true
+			}else if(tonlt(c,a)){
+				//unmasked collapsing
+				if(d){
+					console.log(tolex(a),tolex(b),tolex(c),n)
+				}
+				return false
+			}else{
+				return bfb(n,a[0],b,a)&&bfb(n,a[1],b,a)
+			}
+		}
+	}
+	</script>
+</head>
+<body>
+<textarea id="input"></textarea>
+<button onclick="console.log(standardlist(input.value))">check</button>
+</body>
+</html>
