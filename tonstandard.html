@@ -72,7 +72,7 @@
 		if(!standard(e[1])){
 			return false
 		}
-		if(e[1][1]&&tonlt(e[1][0],e[0])){
+		if(e[1][1]!==undefined&&tonlt(e[1][0],e[0])){
 			return false
 		}
 		if(!bfb(notation,e[0],e)){
@@ -90,7 +90,7 @@
 				continue
 			}
 			if(!standardlex(ll[i])){
-				console.log(ll[i])
+				console.log(ll[i]+" fails")
 			}
 		}
 		return true
@@ -111,7 +111,7 @@
 	function bfb(n,a,b,c){
 		if(n==0){
 			return tonlt(a,b)
-		}else if(a=="0"||a=="Z"){
+		}else if(c=="0"||c=="Z"){
 			return true
 		}else if(c===undefined){
 			return bfb(n,a,b,a)
